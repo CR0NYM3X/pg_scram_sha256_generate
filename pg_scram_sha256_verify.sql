@@ -1,5 +1,5 @@
 /*
- @Function: public.pg_verify_scram_sha256
+ @Function: public.pg_scram_sha256_verify
  @Creation Date: 09/02/2026
  @Description: Valida si una contraseña en texto plano coincide con un hash SCRAM-SHA-256.
 -  validación estricta de StoredKey y ServerKey.
@@ -16,15 +16,15 @@
 
 
 ---------------- COMMENT ----------------
-COMMENT ON FUNCTION public.pg_verify_scram_sha256(text, text) IS
+COMMENT ON FUNCTION public.pg_scram_sha256_verify(text, text) IS
 'Verifica contraseñas contra hashes SCRAM-SHA-256.
 - Parámetros: p_password (input), p_stored_hash (hash de la DB).
 - Retorno: boolean.
 - Seguridad: SECURITY INVOKER.
 - Notas: Extrae automáticamente salt e iteraciones del hash.';
 
--- DROP FUNCTION public.pg_verify_scram_sha256(text, text);
-CREATE OR REPLACE FUNCTION public.pg_verify_scram_sha256(
+-- DROP FUNCTION public.pg_scram_sha256_verify(text, text);
+CREATE OR REPLACE FUNCTION public.pg_scram_sha256_verify(
     p_password    text, 
     p_stored_hash text
 )
@@ -95,12 +95,12 @@ EXCEPTION
 END;
 $func$;
 
-ALTER FUNCTION public.pg_verify_scram_sha256(text, text) SET search_path TO public, pg_temp;
+ALTER FUNCTION public.pg_scram_sha256_verify(text, text) SET search_path TO public, pg_temp;
 
-REVOKE EXECUTE ON FUNCTION public.pg_verify_scram_sha256(text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.pg_scram_sha256_verify(text, text) FROM PUBLIC;
 
 
--- select * from public.pg_verify_scram_sha256('password123', 'SCRAM-SHA-256$10000:vk2Y3Dp2jD6XCdcI3cqmMQ==$2J2PAu6w1rOBiy+F5JOjY3i94ZIpYGCKfkSphzf6RBk=:gDctN/Chn0if2DlAWKTl5X9JBX89KZzMSk1TIcrs9HI=');
+-- select * from public.pg_scram_sha256_verify('password123', 'SCRAM-SHA-256$10000:vk2Y3Dp2jD6XCdcI3cqmMQ==$2J2PAu6w1rOBiy+F5JOjY3i94ZIpYGCKfkSphzf6RBk=:gDctN/Chn0if2DlAWKTl5X9JBX89KZzMSk1TIcrs9HI=');
 
 
 
