@@ -84,7 +84,7 @@ SELECT * FROM public.fn_util_generate_scram_sha256('password123', 10000);
 
 ```
 
-### 2. Verificación Estricta (Login)
+### 2. Verificación (Login)
 
 ```sql
 -- Retornará 't' solo si el hash es íntegro y la clave es correcta
@@ -109,6 +109,39 @@ order by 2 desc;
 ```
 
 
+
+## Auditorias de Seguridad 
+
+```SQL
+
+SELECT 
+    a.rolname AS vulnerable_user,
+    d.password_test AS detected_password,
+    'CRITICAL' AS risk_level
+FROM pg_authid a
+CROSS JOIN (
+    -- Generate an on-the-fly virtual table with the top 20 weak passwords
+    SELECT unnest(ARRAY[
+        '123456', 'password', '123456789', '12345', '12345678', 
+        'qwerty', '111111', '123123', 'admin', 'p@ssword', 
+        'welcome', 'abc123', 'login', 'secret', 'asdfgh', 
+        '1234567', 'monkey', 'dragon', 'football', 'quertyuiop'
+    ]) AS password_test
+) d
+WHERE a.rolpassword IS NOT NULL 
+  AND a.rolpassword LIKE 'SCRAM-SHA-256$%'
+  -- Invoke your custom validation function
+  AND public.pg_scram_sha256_verify(d.password_test, a.rolpassword) = TRUE;
+
++--------------------+----------------------+--------------+
+| usuario_vulnerable | contraseña_detectada | nivel_riesgo |
++--------------------+----------------------+--------------+
+| postgres           | 123123               | CRÍTICO      |
++--------------------+----------------------+--------------+
+(1 row)
+
+
+```
 
  
 
