@@ -78,8 +78,30 @@ Esta herramienta permite generar los componentes del hash directamente en el nav
 ### 1. Generación Desglosada (Registro)
 
 ```sql
-SELECT * FROM public.fn_util_generate_scram_sha256('password123', 4096);
-SELECT * FROM public.fn_util_generate_scram_sha256('password123', 10000);
+postgres@postgres# SELECT * FROM public.fn_util_generate_scram_sha256('password123', 4096);
++-[ RECORD 1 ]+---------------------------------------------------------------------------------------------------------------------------------------+
+| hash        | SCRAM-SHA-256$4096:c8F0iUD3+l/hg4zzohVnXQ==$OLogK2jd8+J3tSHe6un2ls3uHkGW9gQ37jO6GJ4ZPDk=:7iJgiVEa7hbe6nSGkdYMkdqhCEYsK0GS/hAiQzs4KUM= |
+| algoritmo   | SCRAM-SHA-256                                                                                                                         |
+| iteraciones | 4096                                                                                                                                  |
+| salt        | c8F0iUD3+l/hg4zzohVnXQ==                                                                                                              |
+| stored_key  | OLogK2jd8+J3tSHe6un2ls3uHkGW9gQ37jO6GJ4ZPDk=                                                                                          |
+| server_key  | 7iJgiVEa7hbe6nSGkdYMkdqhCEYsK0GS/hAiQzs4KUM=                                                                                          |
++-------------+---------------------------------------------------------------------------------------------------------------------------------------+
+
+Time: 27.906 ms
+
+
+postgres@postgres# SELECT * FROM public.fn_util_generate_scram_sha256('password123', 10000);
++-[ RECORD 1 ]+----------------------------------------------------------------------------------------------------------------------------------------+
+| hash        | SCRAM-SHA-256$10000:h69vMnHhz6h18mPLRMNPAA==$cT4x4CTkpyf+K9nUobqQl/igZsBa4PyPysjzTEfBO/I=:a26eDR/u6wtzG2pER6X2glivwQYjBvqo0BABxU2koXE= |
+| algoritmo   | SCRAM-SHA-256                                                                                                                          |
+| iteraciones | 10000                                                                                                                                  |
+| salt        | h69vMnHhz6h18mPLRMNPAA==                                                                                                               |
+| stored_key  | cT4x4CTkpyf+K9nUobqQl/igZsBa4PyPysjzTEfBO/I=                                                                                           |
+| server_key  | a26eDR/u6wtzG2pER6X2glivwQYjBvqo0BABxU2koXE=                                                                                           |
++-------------+----------------------------------------------------------------------------------------------------------------------------------------+
+
+Time: 65.754 ms
 
 
 ```
