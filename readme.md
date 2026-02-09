@@ -133,11 +133,11 @@ WHERE a.rolpassword IS NOT NULL
   -- Invoke your custom validation function
   AND public.pg_scram_sha256_verify(d.password_test, a.rolpassword) = TRUE;
 
-+--------------------+----------------------+--------------+
-| usuario_vulnerable | contraseña_detectada | nivel_riesgo |
-+--------------------+----------------------+--------------+
-| postgres           | 123123               | CRÍTICO      |
-+--------------------+----------------------+--------------+
++-----------------+-------------------+------------+
+| vulnerable_user | detected_password | risk_level |
++-----------------+-------------------+------------+
+| postgres        | 123123            | CRITICAL   |
++-----------------+-------------------+------------+
 (1 row)
 
 
