@@ -1,3 +1,6 @@
+------------------------ OPCION #1 ------------------------
+
+
 DO $auditoria_seguridad$
 DECLARE
     -- Listado de las 20 contraseñas más débiles
@@ -51,3 +54,33 @@ EXCEPTION
     WHEN OTHERS THEN
         RAISE EXCEPTION 'ERROR DURANTE AUDITORÍA: %', SQLERRM;
 END $auditoria_seguridad$;
+
+
+------------------------ OPCION #2 ------------------------
+
+
+
+
+SELECT 
+    a.rolname AS usuario_vulnerable,
+    d.password_test AS contraseña_detectada,
+    'CRÍTICO' AS nivel_riesgo
+FROM pg_authid a
+CROSS JOIN (
+    -- Generamos el diccionario al vuelo como una tabla virtual
+    SELECT unnest(ARRAY[
+        '123456', 'password', '123456789', '12345', '12345678', 
+        'qwerty', '111111', '123123', 'admin', 'p@ssword', 
+        'welcome', 'abc123', 'login', 'secret', 'asdfgh', 
+        '1234567', 'monkey', 'dragon', 'football', 'quertyuiop'
+    ]) AS password_test
+) d
+WHERE a.rolpassword IS NOT NULL 
+  AND a.rolpassword LIKE 'SCRAM-SHA-256$%'
+  -- Invocamos tu función de validación
+  AND public.pg_scram_sha256_verify(d.password_test, a.rolpassword) = TRUE;
+
+
+
+
+
