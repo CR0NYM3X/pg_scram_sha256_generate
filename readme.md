@@ -103,6 +103,15 @@ postgres@postgres# SELECT * FROM public.fn_util_generate_scram_sha256('password1
 
 Time: 65.754 ms
 
+postgres@postgres# SELECT * from public.pg_md5_generate('password123', 'user_test') AS hash_md5;
++-------------------------------------+
+|              hash_md5               |
++-------------------------------------+
+| md5a55cc73725a729b561ecfc4984d922a9 |
++-------------------------------------+
+(1 row)
+
+
 
 ```
 
@@ -113,6 +122,22 @@ Time: 65.754 ms
 select * from public.pg_scram_sha256_verify(
   'password123',
   'SCRAM-SHA-256$10000:BfjFRQ5cJh8ORscTYOuwuQ==$5a5hkxA6mouSmmCl4m0yd/klStxHVBLp8dLTPbRwLj4=:VuswwU3Muvs2p1q0Oxu7P7rhk+uaG16oc9ZNPS6qfBg='); -- validacion correcta 
+
++------------------------+
+| pg_scram_sha256_verify |
++------------------------+
+| t                      |
++------------------------+
+(1 row)
+
+
+postgres@postgres# SELECT * FROM public.pg_md5_verify('user_test','password123', 'md5a55cc73725a729b561ecfc4984d922a9');
++---------------+
+| pg_md5_verify |
++---------------+
+| t             |
++---------------+
+(1 row)
 
 
 SELECT usename,public.pg_scram_sha256_verify('123123' , passwd )  
