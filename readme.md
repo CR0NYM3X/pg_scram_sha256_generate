@@ -121,7 +121,7 @@ postgres@postgres# SELECT * FROM public.fn_util_generate_scram_sha256('password1
 
 Time: 65.754 ms
 
-postgres@postgres# SELECT * from public.pg_md5_generate('password123', 'user_test') AS hash_md5;
+postgres@postgres# SELECT * from public.pg_md5_generate( 'user_test', 'password123') AS hash_md5;  
 +-------------------------------------+
 |              hash_md5               |
 +-------------------------------------+
