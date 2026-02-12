@@ -85,7 +85,6 @@ Esta herramienta permite generar los componentes del hash directamente en el nav
 ## 🛠️ Casos de Uso
 
 * **Sistemas de Auth Propios**: Crear tu propia tabla de usuarios con el mismo nivel de seguridad que el motor de Postgres.
-* **Gestión Usuarios**: Scripts de automatización que crean usuarios de BD solo si no existen, aplicando hashes SCRAM.
 * **Auditoría Estricta**: Verificación de integridad de hashes almacenados para detectar alteraciones maliciosas.
 
 
