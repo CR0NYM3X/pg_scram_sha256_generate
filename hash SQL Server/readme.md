@@ -34,5 +34,9 @@ SELECT pg_mssql_sha512_verify(
 
 ```
 
+# Links ref
+```
+ https://www.detfalskested.dk/2022/12/07/reimplementing-microsoft-sql-server-pwdencrypt-pwdcompare-in-python/
+```
 
  
