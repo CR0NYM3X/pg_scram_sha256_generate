@@ -17,16 +17,6 @@
 */
 
 
----------------- COMMENT ----------------
-COMMENT ON FUNCTION public.pg_scram_sha256_generate(text, integer) IS
-'Genera componentes SCRAM-SHA-256 detallados.
-- Parámetros: p_password, p_iterations.
-- Retorno: TABLE con desglose técnico del hash.
-- Volatilidad: VOLATILE.
-- Seguridad: SECURITY INVOKER con search_path protegido.';
-
-
-
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -125,6 +115,16 @@ BEGIN
         v_server_key_b64;
 END;
 $func$;
+
+
+---------------- COMMENT ----------------
+COMMENT ON FUNCTION public.pg_scram_sha256_generate(text, integer) IS
+'Genera componentes SCRAM-SHA-256 detallados.
+- Parámetros: p_password, p_iterations.
+- Retorno: TABLE con desglose técnico del hash.
+- Volatilidad: VOLATILE.
+- Seguridad: SECURITY INVOKER con search_path protegido.';
+
 
 
 
