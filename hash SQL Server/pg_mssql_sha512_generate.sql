@@ -18,24 +18,33 @@
  create EXTENSION pgcrypto ;
 
 ---------------- CODE ----------------
+
+---------------- CODE ----------------
+-- DROP FUNCTION public.pg_mssql_sha512_generate(TEXT,TEXT);
+
 CREATE OR REPLACE FUNCTION public.pg_mssql_sha512_generate(
     p_password text,
     p_version  text DEFAULT '0x0200'
 )
-RETURNS text 
+RETURNS TABLE (
+    hash       text,
+    algorithm  text,
+    version    text,
+    salt       text
+)
 AS $func$
 DECLARE
-    -- Variables de control
+    -- Variables de control (Preservadas)
     v_algo          text;
     v_header_hex    text;
     
-    -- Variables de procesamiento
+    -- Variables de procesamiento (Preservadas)
     v_salt          bytea;
     v_pwd_utf16le   bytea;
     v_hashed_part   bytea;
     v_final_hash    bytea;
 BEGIN
-    -- 1. Identificar algoritmo y validar versión
+    -- 1. Identificar algoritmo y validar versión (Lógica Original)
     IF p_version = '0x0200' THEN
         v_algo := 'sha512';
         v_header_hex := '0200';
@@ -47,30 +56,40 @@ BEGIN
             USING HINT = 'Use 0x0200 para SHA-512 o 0x0100 para SHA-1';
     END IF;
 
-    -- 2. Generar Salt (4 bytes estándar en todas las versiones de MSSQL)
+    -- 2. Generar Salt (Lógica Original)
     v_salt := public.gen_random_bytes(4);
     
-    -- 3. Convertir password a UTF-16LE
+    -- 3. Convertir password a UTF-16LE (Lógica Original)
     v_pwd_utf16le := public.text_to_utf16le(p_password);
     
-    -- 4. Calcular Digest dinámico según la versión
+    -- 4. Calcular Digest dinámico (Lógica Original)
     v_hashed_part := public.digest(v_pwd_utf16le || v_salt, v_algo);
     
-    -- 5. Concatenar: Header + Salt + Hash
+    -- 5. Concatenar: Header + Salt + Hash (Lógica Original)
     v_final_hash := pg_catalog.decode(v_header_hex, 'hex') || v_salt || v_hashed_part;
     
-    -- 6. Retorno formateado
-    RETURN '0x' || pg_catalog.upper(pg_catalog.encode(v_final_hash, 'hex'));
+    -- 6. Preparar Retorno con nueva funcionalidad
+    -- Asignamos los valores a las columnas de salida de la TABLE
+    hash      := '0x' || pg_catalog.upper(pg_catalog.encode(v_final_hash, 'hex'));
+    algorithm := pg_catalog.upper(v_algo);
+    version   := p_version;
+    salt      := '0x' || pg_catalog.upper(pg_catalog.encode(v_salt, 'hex'));
+
+    RETURN NEXT;
 END;
 $func$ 
 LANGUAGE plpgsql 
 STABLE
 SECURITY DEFINER;
 
--- Ajuste de seguridad search_path
+-- Ajuste de seguridad search_path (Obligatorio para SECURITY DEFINER)
 ALTER FUNCTION public.pg_mssql_sha512_generate(text, text) 
 SET search_path TO public, pg_temp;
 
+-- Revocar permisos públicos
+REVOKE EXECUTE ON FUNCTION public.pg_mssql_sha512_generate(text, text) FROM PUBLIC;
+
+ 
 
 
 ---------------- COMMENT ----------------
@@ -84,7 +103,6 @@ COMMENT ON FUNCTION public.pg_mssql_sha512_generate(text, text) IS
 
 
 REVOKE ALL ON FUNCTION public.pg_mssql_sha512_generate(text, text) FROM PUBLIC;
-
 
 
 ---------------- EXAMPLE USAGE ----------------
