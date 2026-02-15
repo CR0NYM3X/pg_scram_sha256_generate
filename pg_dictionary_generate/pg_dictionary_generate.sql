@@ -1,5 +1,5 @@
-DROP FUNCTION security.fn_generar_diccionario_avanzado( text[],boolean,int);
-CREATE OR REPLACE FUNCTION security.fn_generar_diccionario_avanzado(
+DROP FUNCTION security.pg_dictionary_generate ( text[],boolean,int);
+CREATE OR REPLACE FUNCTION security.pg_dictionary_generate (
     p_keywords      text[],
     p_persistir     boolean DEFAULT false,
     p_max_palabras  int DEFAULT 1000
@@ -85,14 +85,14 @@ BEGIN
 
     IF p_persistir THEN
         INSERT INTO security.diccionario_generado (word)
-        SELECT security.fn_generar_diccionario_avanzado(p_keywords, false, p_max_palabras)
+        SELECT security.pg_dictionary_generate (p_keywords, false, p_max_palabras)
         ON CONFLICT DO NOTHING;
     END IF;
 END;
 $$;
 
 
-SELECT password_generated FROM security.fn_generar_diccionario_avanzado(
+SELECT password_generated FROM security.pg_dictionary_generate (
     p_keywords := ARRAY[ 'perro'], 
     p_persistir := false, 
     p_max_palabras := 500
