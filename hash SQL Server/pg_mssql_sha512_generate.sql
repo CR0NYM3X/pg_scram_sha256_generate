@@ -105,11 +105,11 @@ REVOKE ALL ON FUNCTION public.pg_mssql_sha512_generate(text, text) FROM PUBLIC;
 
 ---------------- EXAMPLE USAGE ----------------
 -- Generar hash moderno (Default - SQL 2012+)
--- SELECT public.pg_mssql_sha512_generate('admin123'); 
+-- SELECT  * from  public.pg_mssql_sha512_generate('admin123'); 
 
 
 -- Generar hash antiguo (SQL 2000/2005/2008)
--- SELECT public.pg_mssql_sha512_generate('admin123', '0x0100');
+-- SELECT  * from  public.pg_mssql_sha512_generate('admin123', '0x0100');
 
 
 
