@@ -26,7 +26,7 @@ CREATE SCHEMA IF NOT EXISTS security;
 ```
 
 
-2. Ejecuta el script SQL para compilar la función `fn_generar_diccionario_avanzado`.
+2. Ejecuta el script SQL para compilar la función `pg_dictionary_generate`.
 
 ---
 
@@ -42,7 +42,7 @@ Muestra cómo la función entrega primero los resultados más obvios.
 
 ```sql
 SELECT password_generated 
-FROM security.fn_generar_diccionario_avanzado(
+FROM security.pg_dictionary_generate (
     p_keywords := ARRAY['secreto'],
     p_persistir := true,
     p_max_palabras := 5
@@ -68,7 +68,7 @@ Ejemplo de cómo la función construye contraseñas que cumplen con políticas d
 
 ```sql
 SELECT password_generated 
-FROM security.fn_generar_diccionario_avanzado(
+FROM security.pg_dictionary_generate(
     p_keywords := ARRAY['secreto'],
     p_persistir := false,
     p_max_palabras := 500
