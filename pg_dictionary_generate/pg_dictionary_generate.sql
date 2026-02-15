@@ -30,7 +30,7 @@
 */
 
 
-
+create schema security;
 -- DROP FUNCTION security.fn_generar_diccionario_pentest(text[],boolean,int,int,int,int,boolean);
 
 CREATE OR REPLACE FUNCTION security.fn_generar_diccionario_pentest(
