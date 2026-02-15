@@ -73,8 +73,9 @@ BEGIN
 
     -- Creación idempotente de tabla UNLOGGED para persistencia sin saturar logs de DB
     IF p_persistir THEN
-        DROP TABLE IF EXISTS security.diccionario_generado;
-        CREATE UNLOGGED TABLE security.diccionario_generado (word text PRIMARY KEY);
+        IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'security' AND tablename = 'diccionario_generado') THEN
+            CREATE UNLOGGED TABLE security.diccionario_generado (word text PRIMARY KEY);
+        END IF;
     END IF;
 
     -- Cálculo de cuota por palabra para asegurar representatividad de todas las keywords
