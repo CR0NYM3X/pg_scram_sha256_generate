@@ -18,8 +18,6 @@
  create EXTENSION pgcrypto ;
 
 ---------------- CODE ----------------
-
----------------- CODE ----------------
 -- DROP FUNCTION public.pg_mssql_sha512_generate(TEXT,TEXT);
 
 CREATE OR REPLACE FUNCTION public.pg_mssql_sha512_generate(
