@@ -1,135 +1,102 @@
-# pg_dictionary_generate 🛡️
 
-**Advanced Pentesting Dictionary Generator for PostgreSQL**
+# Advanced Wordlist Generator for PostgreSQL (Smart Dictionary)
 
-Motor de generación de diccionarios (wordlists) de alto rendimiento desarrollado en PL/pgSQL. Diseñado para auditores de seguridad y pentester que necesitan generar permutaciones de contraseñas basadas en patrones de comportamiento humano directamente en la base de datos.
+Este repositorio contiene una potente herramienta en **PL/pgSQL** diseñada para especialistas en ciberseguridad y administradores de bases de datos. La función genera diccionarios de contraseñas dinámicos aplicando mutaciones inteligentes sobre palabras clave (keywords) de entrada.
 
 ## 🚀 Características Principales
 
-* **Lógica Multietapa**: Transforma semillas simples mediante variaciones de caja (Case), Leetspeak, sufijos temporales y símbolos especiales.
-* **Control de Profundidad**: Permite definir la agresividad del ataque (Sufijos vs Prefijos vs Infijos).
-* **Evasión de IDS/WAF**: Opción de mezcla aleatoria (`p_shuffle`) para romper patrones secuenciales.
-* **Alto Rendimiento**: Capacidad de persistencia en tablas `UNLOGGED` (sin rastro en WAL) para escrituras masivas ultra rápidas.
-* **Balanceo Inteligente**: Reparto equitativo de la cuota de palabras entre todas las keywords proporcionadas.
+* **Orden de Ataque Eficiente:** Los resultados se clasifican por peso. Primero se entregan las variantes más probables (palabra exacta, mayúsculas, secuencias comunes) para reducir el tiempo de búsqueda.
+* **Motor de Mutación Avanzado:**
+* **LeetSpeak:** Sustitución de caracteres por números (`a -> 4`, `e -> 3`, etc.).
+* **Case Shuffling:** Mezcla aleatoria de mayúsculas y minúsculas (ej. `tArgEt`).
+* **Deformación:** Inversión de texto (`reverse`) y duplicación de caracteres (`TTAARRGGEETT`).
+
+
+* **Permutación Estructural:** Combina de forma aleatoria la palabra base con símbolos, años y términos comunes (`admin`, `root`, `pass`).
+* **Almacenamiento Unlogged:** Soporte para tablas `UNLOGGED`, lo que permite una generación masiva de datos sin sobrecargar el log de transacciones (WAL) de la base de datos.
 
 ---
 
-## 🛠️ Parámetros de la Función
+## 🛠️ Instalación
 
-| Parámetro | Tipo | Descripción |
-| --- | --- | --- |
-| `p_keywords` | `text[]` | Array de palabras semilla (Ej: `ARRAY['admin', 'soporte']`). |
-| `p_persistir` | `boolean` | `true` para volcar resultados en `security.diccionario_generado`. |
-| `p_anio_inicio/fin` | `int` | Rango de años para permutaciones temporales. |
-| `p_profundidad` | `int` | Nivel de agresividad (1: Básico, 2: Medio, 3: Agresivo). |
-| `p_max_palabras` | `int` | Límite total de palabras a generar (Balanceado por keyword). |
-| `p_shuffle` | `boolean` | `true` para desordenar aleatoriamente la salida. |
+1. Crea el esquema de seguridad si no existe:
+```sql
+CREATE SCHEMA IF NOT EXISTS security;
+
+```
+
+
+2. Ejecuta el script SQL para compilar la función `fn_generar_diccionario_avanzado`.
 
 ---
 
-## 📖 Ejemplos de Uso
+## 🧪 Casos de Prueba (Demo)
 
-### 1. Generación Básica con Persistencia
+Utilizando la palabra clave de ejemplo: **`secreto`**
 
-Este ejemplo genera un diccionario de 10,000 palabras balanceadas y las guarda en la tabla de seguridad.
+### Test 1: Variantes de Alta Probabilidad
+
+Muestra cómo la función entrega primero los resultados más obvios.
+
+**Query:**
 
 ```sql
-SELECT count(*) FROM security.pg_dictionary_generate(
-    p_keywords     => ARRAY['Corporativo', 'Seguridad'], 
-    p_persistir    => true,                         
-    p_anio_inicio  => 2020,                         
-    p_anio_fin     => 2026,                         
-    p_profundidad  => 3,                            
-    p_max_palabras => 10000,                        
-    p_shuffle      => true                          
+SELECT password_generated 
+FROM security.fn_generar_diccionario_avanzado(
+    p_keywords := ARRAY['secreto'],
+    p_persistir := true,
+    p_max_palabras := 5
 );
 
+select * from security.diccionario_generado;
+
 ```
 
-### 2. Expansión Masiva (Bloque Anónimo)
+**Resultados:**
 
-Utiliza este bloque para ejecutar múltiples pasadas y construir un diccionario de gran escala con feedback en tiempo real en la consola.
+1. `secreto` (Palabra exacta)
+2. `SECRETO` (Mayúsculas)
+3. `secreto123` (Patrón más usado)
+4. `oterces` (Invertida)
+5. `s3cr3t0` (LeetSpeak)
+
+### Test 2: Estructuras Inteligentes
+
+Ejemplo de cómo la función construye contraseñas que cumplen con políticas de complejidad.
+
+**Query:**
 
 ```sql
-DO $$
-DECLARE
-    -- Configuración
-    v_iteraciones   integer := 100; -- Cantidad de ejecuciones (N)
-    v_i             integer;
-    v_conteo_actual bigint;
-    -- Secuencias ANSI para actualización de línea en consola psql
-    v_clear_line    text := E'\r\x1b[K'; 
-BEGIN
-    RAISE NOTICE 'Iniciando expansión de diccionario Pentesting...';
-
-    FOR v_i IN 1..v_iteraciones LOOP
-        
-        -- Ejecución de la función (Generación masiva balanceada)
-        PERFORM security.pg_dictionary_generate(
-            p_keywords     => ARRAY['empresa', 'seguridad', 'informacion', 'info', 'desempeño', 'gestion',
-                'mesadeayuda', 'mesa', 'gestion de desempeño', 'hoja de vida', 
-                'circulares', 'decisiones', 'Inicio', 'Directorio', 'Quiénes Somos',
-                'Circular', 'KPI', 'Organigrama', 'Infraestructura Tecnológica',
-                'MC', 'Manual Técnico', 'sucursal', 'oficina', 'universidad',
-                'Políticas', 'Estándares', 'Procesos', 'Integridad', 'Disponibilidad',
-                'Gobierno de Seguridad', 'Marco de Gobierno', 'Seguridad de la Información'],
-            p_persistir    => true, 
-            p_anio_inicio  => 2020,
-            p_anio_fin     => 2026,
-            p_profundidad  => 3,
-            p_max_palabras => 10000,
-            p_shuffle      => true
-        );
-
-        -- Conteo de registros acumulados en tabla UNLOGGED
-        SELECT count(*) INTO v_conteo_actual FROM security.diccionario_generado;
-
-        -- Actualización dinámica de progreso en consola
-        RAISE NOTICE '%[PROGRESO] Ejecución: %/% | Total Palabras Únicas: %', 
-                     v_clear_line, v_i, v_iteraciones, v_conteo_actual;
-
-    END LOOP;
-
-    RAISE NOTICE E'\n---------------------------------------------------------';
-    RAISE NOTICE 'DICCIONARIO LISTO: % registros generados.', v_conteo_actual;
-END $$;
+SELECT password_generated 
+FROM security.fn_generar_diccionario_avanzado(
+    p_keywords := ARRAY['secreto'],
+    p_persistir := false,
+    p_max_palabras := 500
+) 
+OFFSET 50 LIMIT 5;
 
 ```
 
----
+**Muestra de resultados:**
 
-## 🔍 Verificación de Datos
-
-Para consultar el diccionario generado y validar la calidad de las permutaciones:
-
-```sql
--- Consultar los primeros 15 registros ordenados alfabéticamente
-SELECT * FROM security.diccionario_generado ORDER BY word ASC LIMIT 15;
-
--- Limpiar diccionario para una nueva auditoría
--- TRUNCATE TABLE security.diccionario_generado RESTART IDENTITY;
-
-```
+* `S3cr3t0.2025!`
+* `secreto.admin.2024`
+* `SSEECRREETTOO_1`
+* `2005!secreto123`
+* `sEcReTo@7`
 
 ---
 
-## ⚖️ Niveles de Profundidad (`p_profundidad`)
+## 📊 Arquitectura de Generación
 
-| Nivel | Tipo | Descripción | Ejemplo |
-| --- | --- | --- | --- |
-| **1** | **Básico** | Solo símbolos al FINAL (Patrón común). | `Admin@2025` |
-| **2** | **Medio** | Habilita PREFIJOS (Símbolos al inicio). | `@Admin2025` |
-| **3** | **Agresivo** | Combinaciones complejas y dobles símbolos. | `!Admin#2025` |
+La función opera en tres capas:
 
----
-
-## ⚠️ Seguridad y Privilegios
-
-* La función utiliza `SECURITY INVOKER`.
-* Se recomienda restringir el permiso de ejecución solo a roles de auditoría técnica.
-* El uso de tablas `UNLOGGED` garantiza que el diccionario no persista en copias de seguridad de logs (WAL), protegiendo la volatilidad del proceso de pentesting.
+1. **Capa de Mutación:** Transforma la palabra base (Leet, Case, Reverse).
+2. **Capa de Combinación:** Mezcla las mutaciones con prefijos y sufijos (años, números, símbolos).
+3. **Capa de Filtrado:** Elimina duplicados, filtra por longitud y ordena por prioridad de éxito.
 
 ---
 
-**Autor:** CR0NYM3X
-**Versión:** 1.2.0
+## ⚠️ Nota de Uso Legal
+
+Esta herramienta ha sido creada exclusivamente con fines educativos y para su uso en auditorías de seguridad debidamente autorizadas. El autor no se hace responsable del mal uso de este software.
