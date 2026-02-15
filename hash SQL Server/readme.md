@@ -1,4 +1,9 @@
- 
+# Requisitos 
+- Instalar función text_to_utf16le.sql
+- Instalar extensión pgcrypto 
+
+
+
 ## Consideraciones Técnicas  
 
 * **Dependencia Crítica:** El uso de la extensión `pgcrypto` es obligatorio, ya que PostgreSQL nativo no incluye `digest()` ni `gen_random_bytes()` en su núcleo estándar.
@@ -52,12 +57,36 @@ Para que tu repositorio sea una referencia técnica de "grado senior", te sugier
 ## Ejemplo de uso  
 ```sql
 
-select * from pg_mssql_sha512_generate('Test123');
+select * from pg_mssql_sha512_generate('admin123');
++------------------------------------------------------------------------------------------------------------------------------------------------+
+|                                                            pg_mssql_sha512_generate                                                            |
++------------------------------------------------------------------------------------------------------------------------------------------------+
+| 0x020014A9505D8BA9C7972EB9B695383399486FC7577380DD0DF4469EC5A63FBC759585568D59508CB59E34A3998637FCA9E12178AD9EDCF9427B24671C483B49AF5935395E43 |
++------------------------------------------------------------------------------------------------------------------------------------------------+
+(1 row)
 
-SELECT pg_mssql_sha512_verify(
-    'Test123', 
-    '0x02001CF0E6CD2181A220D7923EAF8F4648C71089BF4538E62DD71F1DF11FFFC098204404B0FF76D53EF31E04125ECD15112A2459965CBDD7FB4F92C6895C32194418C4921808'
-);
+
+
+SELECT * FROM public.pg_mssql_sha512_verify('admin123', '0x01003667CAD7199125862BFB8B6A1593920D8A023607EF8E2C34');
++----------+-----------+---------+------------+
+| is_valid | algorithm | version |    salt    |
++----------+-----------+---------+------------+
+| t        | SHA1      | 0x0100  | 0x3667CAD7 |
++----------+-----------+---------+------------+
+(1 row)
+
+Time: 0.498 ms
+
+
+SELECT * FROM public.pg_mssql_sha512_verify('admin123', '0x02000B9DBF93F90292DB9E2A9B6BC49EFA79CCFFE6B0FA071C2D1ADAF05A238CE16F913A8749FDFEDAA408AB013DBF1C38C3A5D04C7E305D02D192D8AAD5CF6ECD5A0C8ABB49');
++----------+-----------+---------+------------+
+| is_valid | algorithm | version |    salt    |
++----------+-----------+---------+------------+
+| t        | SHA512    | 0x0200  | 0xA894AC7F |
++----------+-----------+---------+------------+
+(1 row)
+
+
 
 ```
 
