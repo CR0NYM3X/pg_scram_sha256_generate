@@ -16,7 +16,7 @@
 */
 
 ---------------- CODE ----------------
-DROP FUNCTION public.pg_mssql_sha512_verify(text,text);
+-- DROP FUNCTION public.pg_mssql_sha512_verify(text,text);
 
 CREATE OR REPLACE FUNCTION public.pg_mssql_sha512_verify(
     p_password_plain text, 
