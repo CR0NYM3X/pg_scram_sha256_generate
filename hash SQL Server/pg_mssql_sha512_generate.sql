@@ -82,6 +82,9 @@ REVOKE EXECUTE ON FUNCTION public.text_to_utf16le(text) FROM PUBLIC;
  @Author: CR0NYM3X
 */
 
+
+ create EXTENSION pgcrypto ;
+
 ---------------- CODE ----------------
 CREATE OR REPLACE FUNCTION public.pg_mssql_sha512_generate(
     p_password text,
