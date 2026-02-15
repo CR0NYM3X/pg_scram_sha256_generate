@@ -93,7 +93,7 @@ $$;
 
 
 SELECT password_generated FROM security.fn_generar_diccionario_avanzado(
-    p_keywords := ARRAY[ 'coppel'], 
+    p_keywords := ARRAY[ 'perro'], 
     p_persistir := false, 
     p_max_palabras := 500
 );
